@@ -34,11 +34,12 @@ def jukes_cantor(reference_sequence: str, distant_sequence: str) -> float:
     This alignment has non-corrected genetic distance (ignoring indels) equal to 1, 
     while JC corrected genetic distance is 1.163.
     """
+    valid_bases = set("ACGT")
     hamming_distance = 0
     valid_length = 0
-    
-    for ref_base, dist_base in zip(reference_sequence, distant_sequence):
-        if ref_base == '-' or dist_base == '-':
+
+    for ref_base, dist_base in zip(reference_sequence.upper(), distant_sequence.upper()):
+        if ref_base not in valid_bases or dist_base not in valid_bases:
             continue
         valid_length += 1
         if ref_base != dist_base:
@@ -47,15 +48,15 @@ def jukes_cantor(reference_sequence: str, distant_sequence: str) -> float:
     if valid_length == 0:
         return 0.0
 
-    hamming_substitution_rate = hamming_distance / valid_length
+    p = hamming_distance / valid_length
 
-    if hamming_substitution_rate >= 0.75:
+    if p >= 0.75:
         return float('inf')
-    
-    d_per_site = -0.75 * math.log(1 - (4 / 3) * hamming_substitution_rate)
-    return round(d_per_site * valid_length, 2)
 
-# print(jukes_cantor("AGGT-GA", "AGC-AGA"))
+    d_per_site = -0.75 * math.log(1 - (4 / 3) * p)
+    return d_per_site * valid_length
+
+print(jukes_cantor("AGGT-GA", "AGC-AGA"))
 
 def kimura_two_parameter(reference_sequence: str, distant_sequence: str) -> float:
     """The Kimura Two Parameter correction for estimating genetic distances
